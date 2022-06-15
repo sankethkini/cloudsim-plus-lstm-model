@@ -102,11 +102,12 @@ public class HorizontalVmScalingSimple extends VmScalingAbstract implements Hori
         if(!haveNewCloudletsArrived()){
             return false;
         }
-
+        System.out.println("current cloudlets in use "+getVm().getBroker().getCloudletCreatedList().toString());
         final double vmCpuUsagePercent = getVm().getCpuPercentUtilization() * 100;
         final Vm newVm = getVmSupplier().get();
+        newVm.setSubmissionDelay(100);
         final String timeStr = String.format("%.2f", time);
-        LOGGER.info(
+        LOGGER.error(
             "{}: {}{}: Requesting creation of {} to receive new Cloudlets in order to balance load of {}. {} CPU usage is {}%",
             timeStr, getClass().getSimpleName(), getVm(), newVm, getVm(), getVm().getId(), vmCpuUsagePercent);
         getVm().getBroker().submitVm(newVm);

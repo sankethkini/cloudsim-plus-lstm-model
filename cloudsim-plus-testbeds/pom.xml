@@ -64,6 +64,7 @@
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <!-- License file to be used by the com.mycila.license-maven-plugin -->
         <copyrightfile>../COPYRIGHT</copyrightfile>
+        <java.version>11</java.version>
     </properties>
 
     <build>

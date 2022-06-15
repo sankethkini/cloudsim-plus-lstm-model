@@ -63,6 +63,7 @@ public final class Log {
      */
     public static void setLevel(final Level level){
         final Logger root = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+
         setLevel(root, level);
     }
 }

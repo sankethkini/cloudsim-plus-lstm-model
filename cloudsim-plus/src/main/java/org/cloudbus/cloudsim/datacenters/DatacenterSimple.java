@@ -95,6 +95,8 @@ public class DatacenterSimple extends CloudSimEntity implements Datacenter {
     private double timeZone;
     private Map<Vm, Host> lastMigrationMap;
 
+    private Map<Long,Double> vmDestructionDetails;
+
     /** @see #getHostSearchRetryDelay() */
     private double hostSearchRetryDelay;
 
@@ -194,6 +196,7 @@ public class DatacenterSimple extends CloudSimEntity implements Datacenter {
         this.bandwidthPercentForMigration = DEF_BW_PERCENT_FOR_MIGRATION;
         this.migrationsEnabled = true;
         this.hostSearchRetryDelay = -1;
+        this.vmDestructionDetails=new HashMap<>();
 
         this.lastMigrationMap = Collections.emptyMap();
 
@@ -585,13 +588,18 @@ public class DatacenterSimple extends CloudSimEntity implements Datacenter {
         }
 
         final String warningMsg = generateNotFinishedCloudletsWarning(vm);
+        if(!this.vmDestructionDetails.containsKey(vm.getId())){
+            this.vmDestructionDetails.put(vm.getId(), getSimulation().clock());
+        }
         final String msg = String.format(
                 "%s: %s: %s destroyed on %s. %s",
                 getSimulation().clockStr(), getClass().getSimpleName(), vm, vm.getHost(), warningMsg);
-        if(warningMsg.isEmpty() || getSimulation().isTerminationTimeSet())
-            LOGGER.info(msg);
-        else LOGGER.warn(msg);
+        System.out.println(msg);
         return true;
+    }
+
+    public Map<Long,Double> getDestructionInfo(){
+        return this.vmDestructionDetails;
     }
 
     private String generateNotFinishedCloudletsWarning(final Vm vm) {

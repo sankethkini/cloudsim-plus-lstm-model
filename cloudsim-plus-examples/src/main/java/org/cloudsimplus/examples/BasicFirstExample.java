@@ -34,6 +34,7 @@ import org.cloudbus.cloudsim.hosts.Host;
 import org.cloudbus.cloudsim.hosts.HostSimple;
 import org.cloudbus.cloudsim.resources.Pe;
 import org.cloudbus.cloudsim.resources.PeSimple;
+import org.cloudbus.cloudsim.schedulers.cloudlet.CloudletSchedulerSpaceShared;
 import org.cloudbus.cloudsim.utilizationmodels.UtilizationModelDynamic;
 import org.cloudbus.cloudsim.vms.Vm;
 import org.cloudbus.cloudsim.vms.VmSimple;
@@ -54,19 +55,20 @@ import java.util.List;
  * @since CloudSim Plus 1.0
  */
 public class BasicFirstExample {
-    private static final int  HOSTS = 1;
-    private static final int  HOST_PES = 8;
+    private static final int  HOSTS = 4;
+    private static final int  HOST_PES = 20;
     private static final int  HOST_MIPS = 1000;
-    private static final int  HOST_RAM = 2048; //in Megabytes
-    private static final long HOST_BW = 10_000; //in Megabits/s
-    private static final long HOST_STORAGE = 1_000_000; //in Megabytes
+    private static final int  HOST_RAM = 2048000; //in Megabytes
+    private static final long HOST_BW = 1000000000; //in Megabits/s
+    private static final long HOST_STORAGE = 1000000000; //in Megabytes
 
     private static final int VMS = 2;
     private static final int VM_PES = 4;
 
-    private static final int CLOUDLETS = 4;
+    private static final int CLOUDLETS = 90;
     private static final int CLOUDLET_PES = 2;
-    private static final int CLOUDLET_LENGTH = 10_000;
+    private static final int CLOUDLET_LENGTH = 10000;
+
 
     private final CloudSim simulation;
     private DatacenterBroker broker0;
@@ -91,9 +93,21 @@ public class BasicFirstExample {
 
         vmList = createVms();
         cloudletList = createCloudlets();
-        broker0.submitVmList(vmList);
-        broker0.submitCloudletList(cloudletList);
+        //broker0.submitVmList(vmList);
+       // broker0.submitCloudletList(cloudletList);
+        Vm v1=this.createVM();
+        Vm v2=new VmSimple(HOST_MIPS, 6,new CloudletSchedulerSpaceShared())
+            .setRam(512).setBw(1000).setSize(10_000);
+        v2.setSubmissionDelay(0);
 
+        Cloudlet c1=this.createCL();
+        Cloudlet c2=this.createCL();
+        c2.setNumberOfPes(6);
+        c2.setSubmissionDelay(10);
+        broker0.submitVm(v1);
+        broker0.submitVm(v2);
+        broker0.submitCloudlet(c1);
+        broker0.submitCloudlet(c2);
         simulation.start();
 
         final List<Cloudlet> finishedCloudlets = broker0.getCloudletFinishedList();
@@ -136,12 +150,16 @@ public class BasicFirstExample {
         final var vmList = new ArrayList<Vm>(VMS);
         for (int i = 0; i < VMS; i++) {
             //Uses a CloudletSchedulerTimeShared by default to schedule Cloudlets
-            final var vm = new VmSimple(HOST_MIPS, VM_PES);
-            vm.setRam(512).setBw(1000).setSize(10_000);
+            final var vm = createVM();
             vmList.add(vm);
         }
 
         return vmList;
+    }
+
+    private Vm createVM(){
+        return new VmSimple(HOST_MIPS, VM_PES,new CloudletSchedulerSpaceShared())
+            .setRam(512).setBw(1000).setSize(10_000);
     }
 
     /**
@@ -151,14 +169,18 @@ public class BasicFirstExample {
         final var cloudletList = new ArrayList<Cloudlet>(CLOUDLETS);
 
         //UtilizationModel defining the Cloudlets use only 50% of any resource all the time
-        final var utilizationModel = new UtilizationModelDynamic(0.5);
+        final var utilizationModel = new UtilizationModelDynamic(0.1);
 
         for (int i = 0; i < CLOUDLETS; i++) {
-            final var cloudlet = new CloudletSimple(CLOUDLET_LENGTH, CLOUDLET_PES, utilizationModel);
-            cloudlet.setSizes(1024);
-            cloudletList.add(cloudlet);
+            cloudletList.add(createCL());
         }
 
         return cloudletList;
+    }
+
+    private Cloudlet createCL(){
+        final var utilizationModel = new UtilizationModelDynamic(0.1);
+        return new CloudletSimple(CLOUDLET_LENGTH, CLOUDLET_PES, utilizationModel)
+            .setSizes(1024);
     }
 }

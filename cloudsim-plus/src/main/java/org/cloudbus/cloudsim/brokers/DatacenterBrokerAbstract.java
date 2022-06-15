@@ -229,7 +229,7 @@ public abstract class DatacenterBrokerAbstract extends CloudSimEntity implements
                 "{}: {}: List of {} VMs submitted to the broker during simulation execution. VMs creation request sent to Datacenter.",
                 getSimulation().clockStr(), getName(), list.size());
             requestDatacentersToCreateWaitingCloudlets();
-            if(!vmCreationRetrySent) {
+            if(true) {
                 lastSelectedDc = null;
                 requestDatacenterToCreateWaitingVms(false, false);
             }

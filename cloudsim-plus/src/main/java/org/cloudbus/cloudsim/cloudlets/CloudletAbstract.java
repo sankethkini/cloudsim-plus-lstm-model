@@ -92,6 +92,18 @@ public abstract class CloudletAbstract extends CustomerEntityAbstract implements
     /** @see #getAccumulatedBwCost() */
     private double accumulatedBwCost;
 
+    @Override
+    public double getSubmitedTime() {
+        return submitedTime;
+    }
+
+    @Override
+    public void setSubmitedTime(double submitedTime) {
+        this.submitedTime = submitedTime;
+    }
+
+    private double submitedTime;
+
     /** @see #getUtilizationModelCpu() */
     private UtilizationModel utilizationModelCpu;
 

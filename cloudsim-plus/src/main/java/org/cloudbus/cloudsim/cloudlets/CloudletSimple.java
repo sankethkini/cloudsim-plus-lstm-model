@@ -44,6 +44,8 @@ public class CloudletSimple extends CloudletAbstract {
         super(length, pesNumber, utilizationModel);
     }
 
+
+
     /**
      * Creates a Cloudlet with no priority or id.
      * The id is defined when the Cloudlet is submitted to

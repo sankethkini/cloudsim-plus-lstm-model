@@ -850,4 +850,9 @@ public interface Cloudlet extends UniquelyIdentifiable, Comparable<Cloudlet>, Cu
      * @return
      */
     Cloudlet reset();
+
+    double getSubmitedTime();
+
+    void setSubmitedTime(double submitedTime);
+
 }

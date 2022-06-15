@@ -142,7 +142,7 @@ public class PauseSimulationAtGivenTimeExample1 {
         Otherwise, more complex mechanisms have to be used
         to schedule a pause when the simulation is already running.
         */
-        this.simulation.pause(22);
+        this.simulation.pause(20);
 
         /*
         * Sets a Listener that will be notified when the simulation is paused.

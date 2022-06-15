@@ -107,12 +107,14 @@ public class SynchronousSimulationExample1 {
         broker0.submitCloudletList(cloudletList);
 
         //Sets a termination time, trying to stop the simulation before such a deadline
-        //simulation.terminateAt(20);
+        simulation.terminateAt(200);
 
         simulation.startSync();
         while(simulation.isRunning()){
+            broker0.submitCloudletList(cloudletList);
             simulation.runFor(INTERVAL);
             printVmCpuUtilization();
+
         }
 
         final List<Cloudlet> finishedCloudlets = broker0.getCloudletFinishedList();

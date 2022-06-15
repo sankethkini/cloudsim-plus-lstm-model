@@ -241,4 +241,14 @@ final class CloudletNull implements Cloudlet {
         return -1;
     }
     @Override public Cloudlet reset() { return this; }
+
+    @Override
+    public double getSubmitedTime() {
+        return 0;
+    }
+
+    @Override
+    public void setSubmitedTime(double submitedTime) {
+
+    }
 }

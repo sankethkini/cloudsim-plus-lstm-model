@@ -87,9 +87,12 @@ public class SynchronousSimulationDestroyVmExample1 {
     private DatacenterBrokerSimple broker0;
     private List<Vm> vmList;
     private List<Cloudlet> cloudletList;
+
+    private List<Cloudlet> cloudletList2;
     private Datacenter datacenter0;
     private double previousClock;
 
+    private static boolean isSub=true;
     public static void main(String[] args) {
         new SynchronousSimulationDestroyVmExample1();
     }
@@ -105,13 +108,26 @@ public class SynchronousSimulationDestroyVmExample1 {
 
         vmList = createVms();
         cloudletList = createCloudlets();
-        broker0.submitVmList(vmList);
-        broker0.submitCloudletList(cloudletList);
-
+        cloudletList2 = createCloudlets();
+        broker0.submitVm(new VmSimple(1000,1));
+        simulation.terminateAt(1000);
         simulation.startSync();
         while(simulation.isRunning()){
-            tryDestroyVmAndResubmitCloudlets();
             simulation.runFor(INTERVAL);
+            simulation.pause();
+            if(simulation.clock()>=50){
+                System.out.println("submitted");
+                broker0.submitCloudletList(cloudletList);
+            }
+            if(simulation.clock()>=100){
+                System.out.println("submitted1");
+                broker0.submitCloudletList(cloudletList2);
+                if(isSub){
+                    broker0.submitVmList(vmList);
+                    isSub=false;
+                }
+            }
+            simulation.resume();
             printVmCpuUtilization();
         }
 
@@ -119,6 +135,10 @@ public class SynchronousSimulationDestroyVmExample1 {
         //Sorts finished Cloudlets by Vm ID and then Cloudlet ID
         final Comparator<Cloudlet> comparator = Comparator.comparingLong(cl -> cl.getVm().getId());
         finishedCloudlets.sort(comparator.thenComparingLong(Cloudlet::getId));
+        final List<Cloudlet> cls = broker0.getCloudletFinishedList();
+        for(int i=0;i<cls.size();i++){
+            System.out.printf("cls #%d\n",cls.get(i).getId());
+        }
         new CloudletsTableBuilder(finishedCloudlets).build();
     }
 
@@ -182,14 +202,14 @@ public class SynchronousSimulationDestroyVmExample1 {
     private Host createHost() {
         final List<Pe> peList = new ArrayList<>(HOST_PES);
         //List of Host's CPUs (Processing Elements, PEs)
-        for (int i = 0; i < HOST_PES; i++) {
+        for (int i = 0; i < 64; i++) {
             //Uses a PeProvisionerSimple by default to provision PEs for VMs
             peList.add(new PeSimple(1000));
         }
 
-        final long ram = 2048; //in Megabytes
-        final long bw = 10000; //in Megabits/s
-        final long storage = 1000000; //in Megabytes
+        final long ram = 20480; //in Megabytes
+        final long bw = 100000; //in Megabits/s
+        final long storage = 10000000; //in Megabytes
 
         /*
         Uses ResourceProvisionerSimple by default for RAM and BW provisioning
@@ -203,10 +223,11 @@ public class SynchronousSimulationDestroyVmExample1 {
      */
     private List<Vm> createVms() {
         final List<Vm> list = new ArrayList<>(VMS);
-        for (int i = 0; i < VMS; i++) {
+        for (int i = 0; i < 4; i++) {
             //Uses a CloudletSchedulerTimeShared by default to schedule Cloudlets
             final Vm vm = new VmSimple(1000, VM_PES);
-            vm.setRam(512).setBw(1000).setSize(10000);
+            vm.setRam(512).setBw(1000).setSize(10000).setSubmissionDelay(10);
+
             list.add(vm);
         }
 
@@ -222,8 +243,7 @@ public class SynchronousSimulationDestroyVmExample1 {
         for (int i = 0; i < CLOUDLETS; i++) {
             final Cloudlet cloudlet = new CloudletSimple(CLOUDLET_LENGTH, CLOUDLET_PES);
             cloudlet.setUtilizationModelCpu(new UtilizationModelFull())
-                    .setSizes(1024)
-                    .setSubmissionDelay(i);
+                    .setSizes(1024);
             list.add(cloudlet);
         }
 

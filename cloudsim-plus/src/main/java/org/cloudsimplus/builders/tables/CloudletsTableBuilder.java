@@ -45,6 +45,8 @@ public class CloudletsTableBuilder extends TableBuilderAbstract<Cloudlet> {
     private static final String SECONDS = "Seconds";
     private static final String CPU_CORES = "CPU cores";
 
+    private static double total=0;
+
     /**
      * Instantiates a builder to print the list of Cloudlets using the a
      * default {@link MarkdownTable}.
@@ -83,11 +85,18 @@ public class CloudletsTableBuilder extends TableBuilderAbstract<Cloudlet> {
         TableColumn col = getTable().addColumn("StartTime", SECONDS).setFormat(TIME_FORMAT);
         addColumnDataFunction(col, Cloudlet::getExecStartTime);
 
+        col = getTable().addColumn("Submitted Time", SECONDS).setFormat(TIME_FORMAT);
+        addColumnDataFunction(col, cl -> roundTime(cl, cl.getSubmitedTime()));
+
         col = getTable().addColumn("FinishTime", SECONDS).setFormat(TIME_FORMAT);
         addColumnDataFunction(col, cl -> roundTime(cl, cl.getFinishTime()));
 
+
         col = getTable().addColumn("ExecTime", SECONDS).setFormat(TIME_FORMAT);
         addColumnDataFunction(col, cl -> roundTime(cl, cl.getActualCpuTime()));
+
+        col = getTable().addColumn("Total time", SECONDS).setFormat(TIME_FORMAT);
+        addColumnDataFunction(col,cl->returnTotalTime(cl));
     }
 
     /**
@@ -112,5 +121,11 @@ public class CloudletsTableBuilder extends TableBuilderAbstract<Cloudlet> {
 
         final double startFraction = cloudlet.getExecStartTime() - (int) cloudlet.getExecStartTime();
         return Math.round(time - startFraction);
+    }
+
+    private double returnTotalTime(final Cloudlet cl){
+        double temp=total;
+        total=total+(cl.getFinishTime()-cl.getSubmitedTime());
+        return temp+(cl.getFinishTime()-cl.getSubmitedTime());
     }
 }
